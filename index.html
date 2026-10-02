@@ -3,109 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Penghitung PAK Guru</title>
+    <title>Jurnal Guru Digital</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
 
     <!-- Header -->
-    <header class="bg-indigo-600 text-white shadow-md">
+    <header class="bg-sky-600 text-white shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-6 text-center">
-            <h1 class="text-2xl font-bold tracking-wide">Aplikasi Penghitung Angka Kredit (PAK) Guru</h1>
-            <p class="text-indigo-200 text-sm mt-1">Simulasi Perhitungan & Sinkronisasi Database Google Sheets</p>
+            <h1 class="text-2xl font-bold tracking-wide">Jurnal Harian Guru Digital</h1>
+            <p class="text-sky-100 text-sm mt-1">Pencatatan Kegiatan Belajar Mengajar Terintegrasi Google Sheets</p>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 sm:p-8 border border-slate-100">
+            <h2 class="text-lg font-semibold text-slate-700 mb-4 pb-2 border-b border-slate-100">Formulir Entri Jurnal Mengajar</h2>
             
-            <!-- Form Input -->
-            <div class="md:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-slate-100">
-                <h2 class="text-lg font-semibold text-slate-700 mb-4 pb-2 border-b border-slate-100">Formulir Penilaian</h2>
-                
-                <form id="pakForm" class="space-y-4">
+            <form id="jurnalForm" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Nama Lengkap & Gelar</label>
-                        <input type="text" id="nama" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Tanggal Mengajar</label>
+                        <input type="date" id="tanggal" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm bg-white">
                     </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">NIP</label>
-                            <input type="text" id="nip" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Pangkat / Golongan</label>
-                            <select id="pangkatGol" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
-                                <option value="III/a">III/a - Penata Muda</option>
-                                <option value="III/b">III/b - Penata Muda Tk. I</option>
-                                <option value="III/c">III/c - Penata</option>
-                                <option value="III/d">III/d - Penata Tk. I</option>
-                                <option value="IV/a">IV/a - Pembina</option>
-                                <option value="IV/b">IV/b - Pembina Tk. I</option>
-                                <option value="IV/c">IV/c - Pembina Utama Muda</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Unsur Utama (Pembelajaran, Pengembangan Keprofesian Berkelanjutan, dll)</label>
-                        <input type="number" step="0.001" id="unsurUtama" placeholder="0.00" required oninput="hitungTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Unsur Penunjang (Pendukung Tugas Guru)</label>
-                        <input type="number" step="0.001" id="unsurPenunjang" placeholder="0.00" required oninput="hitungTotal()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                    </div>
-
-                    <button type="submit" id="btnSubmit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition duration-200 text-sm shadow-sm">
-                        Simpan ke Google Sheets
-                    </button>
-                </form>
-            </div>
-
-            <!-- Ringkasan Hasil Kalkulasi -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-700 mb-4 pb-2 border-b border-slate-100">Hasil Kalkulasi</h2>
-                    <div class="space-y-4">
-                        <div class="bg-indigo-50 p-4 rounded-lg text-center border border-indigo-100">
-                            <span class="block text-xs font-medium text-indigo-600 uppercase tracking-wider">Total Angka Kredit (PAK)</span>
-                            <span id="displayTotal" class="text-3xl font-extrabold text-indigo-700 mt-1 block">0.00</span>
-                        </div>
-                        <div class="text-xs text-slate-500 space-y-1">
-                            <p>• Pastikan komponen unsur utama dan penunjang dihitung sesuai aturan Dupak terbaru.</p>
-                            <p>• Data yang disimpan akan langsung masuk ke database Google Sheets secara *real-time*.</p>
-                        </div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Nama Guru / Pengajar</label>
+                        <input type="text" id="namaGuru" placeholder="Contoh: Budi Santoso, S.Pd" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
                     </div>
                 </div>
 
-                <div id="statusAlert" class="mt-6 hidden p-3 rounded-lg text-xs font-medium text-center"></div>
-            </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Kelas / Rombel</label>
+                        <select id="kelas" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm bg-white">
+                            <option value="Kelas 7A">Kelas 7A</option>
+                            <option value="Kelas 7B">Kelas 7B</option>
+                            <option value="Kelas 8A">Kelas 8A</option>
+                            <option value="Kelas 8B">Kelas 8B</option>
+                            <option value="Kelas 9A">Kelas 9A</option>
+                            <option value="Kelas 9B">Kelas 9B</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Mata Pelajaran</label>
+                        <input type="text" id="mapel" placeholder="Contoh: Matematika / IPA" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
+                    </div>
+                </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Materi / Topik Pembelajaran</label>
+                    <input type="text" id="materi" placeholder="Contoh: Persamaan Linear Satu Variabel" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Catatan / Kendala / Keaktifan Siswa</label>
+                    <textarea id="catatan" rows="3" placeholder="Tuliskan catatan khusus atau kendala selama KBM berlangsung..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"></textarea>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium py-2.5 rounded-lg transition duration-200 text-sm shadow-sm">
+                    Simpan Jurnal Harian
+                </button>
+            </form>
+
+            <div id="statusAlert" class="mt-4 hidden p-3 rounded-lg text-xs font-medium text-center"></div>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-12 py-4 text-center text-xs text-slate-500">
-        &copy; 2026 • Sistem Layanan Penilaian Angka Kredit Guru
+        &copy; 2026 • Sistem Jurnal Harian Guru Digital
     </footer>
 
     <!-- JavaScript Controller -->
     <script>
+        // Set default tanggal hari ini
+        document.getElementById('tanggal').valueAsDate = new Date();
+
         // Ganti dengan URL Deployment Web App Google Apps Script Anda
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNwF-zYORRtLyXQ1mD_-Ooo0Y14ZHIBEkXYYg5ZK6yksfkN5mKejH-rj8yAV96A7IM6w/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygFTG1SZkvICKtB6ysM7McVCaqni29hb91sAOdP-ALlr4TQ6BfpbGL1I5KVrdHDpiGJg/exec';
 
-        function hitungTotal() {
-            const utama = parseFloat(document.getElementById('unsurUtama').value) || 0;
-            const penunjang = parseFloat(document.getElementById('unsurPenunjang').value) || 0;
-            const total = utama + penunjang;
-            document.getElementById('displayTotal').innerText = total.toFixed(3);
-        }
-
-        document.getElementById('pakForm').addEventListener('submit', function(e) {
+        document.getElementById('jurnalForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const btn = document.getElementById('btnSubmit');
@@ -116,36 +95,39 @@
             alertBox.classList.add('hidden');
 
             const payload = {
-                nama: document.getElementById('nama').value,
-                nip: document.getElementById('nip').value,
-                pangkatGol: document.getElementById('pangkatGol').value,
-                unsurUtama: document.getElementById('unsurUtama').value,
-                unsurPenunjang: document.getElementById('unsurPenunjang').value
+                tanggal: document.getElementById('tanggal').value,
+                namaGuru: document.getElementById('namaGuru').value,
+                kelas: document.getElementById('kelas').value,
+                mapel: document.getElementById('mapel').value,
+                materi: document.getElementById('materi').value,
+                catatan: document.getElementById('catatan').value
             };
 
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Penting untuk menghindari CORS issue pada GAS
+                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                alertBox.innerText = 'Berhasil! Data PAK tersimpan ke Google Sheets.';
-                alertBox.className = 'mt-6 p-3 rounded-lg text-xs font-medium text-center bg-emerald-50 text-emerald-700 border border-emerald-200';
+                alertBox.innerText = 'Berhasil! Jurnal harian berhasil dicatat ke Google Sheets.';
+                alertBox.className = 'mt-4 p-3 rounded-lg text-xs font-medium text-center bg-emerald-50 text-emerald-700 border border-emerald-200';
                 alertBox.classList.remove('hidden');
-                document.getElementById('pakForm').reset();
-                document.getElementById('displayTotal').innerText = '0.00';
+                
+                // Reset form kecuali tanggal dan nama guru agar lebih cepat jika mengentri banyak kelas
+                document.getElementById('materi').value = '';
+                document.getElementById('catatan').value = '';
             })
             .catch(error => {
-                alertBox.innerText = 'Gagal menyimpan data: ' + error;
-                alertBox.className = 'mt-6 p-3 rounded-lg text-xs font-medium text-center bg-rose-50 text-rose-700 border border-rose-200';
+                alertBox.innerText = 'Gagal menyimpan jurnal: ' + error;
+                alertBox.className = 'mt-4 p-3 rounded-lg text-xs font-medium text-center bg-rose-50 text-rose-700 border border-rose-200';
                 alertBox.classList.remove('hidden');
             })
             .finally(() => {
                 btn.disabled = false;
-                btn.innerText = 'Simpan ke Google Sheets';
+                btn.innerText = 'Simpan Jurnal Harian';
             });
         });
     </script>
