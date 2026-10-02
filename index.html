@@ -3,48 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Guru Digital</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Jurnal Guru Digital - Multi Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
 
     <!-- Header -->
     <header class="bg-sky-600 text-white shadow-md">
-        <div class="max-w-4xl mx-auto px-4 py-6 text-center">
-            <h1 class="text-2xl font-bold tracking-wide">Jurnal Harian Guru Digital</h1>
-            <p class="text-sky-100 text-sm mt-1">Pencatatan Kegiatan Belajar Mengajar Terintegrasi Google Sheets</p>
+        <div class="max-w-4xl mx-auto px-4 py-5 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">Jurnal Harian Guru Digital</h1>
+                <p id="headerSubtitle" class="text-sky-100 text-xs mt-0.5">Silakan login terlebih dahulu</p>
+            </div>
+            <div id="userInfo" class="hidden text-right">
+                <span id="userRoleBadge" class="inline-block px-2.5 py-0.5 bg-sky-700 text-xs font-semibold rounded-full mb-1"></span>
+                <p id="userNameDisplay" class="text-xs text-sky-100"></p>
+                <button onclick="logout()" class="text-xs text-rose-200 hover:text-white underline mt-1 block">Logout</button>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow">
-        <div class="bg-white rounded-xl shadow-sm p-6 sm:p-8 border border-slate-100">
-            <h2 class="text-lg font-semibold text-slate-700 mb-4 pb-2 border-b border-slate-100">Formulir Entri Jurnal Mengajar</h2>
+
+        <!-- SECTION: HALAMAN LOGIN -->
+        <section id="loginSection" class="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6 sm:p-8 border border-slate-100">
+            <h2 class="text-lg font-semibold text-slate-700 mb-1 text-center">Login Aplikasi</h2>
+            <p class="text-xs text-slate-500 text-center mb-6">Pilih peran dan masukkan kredensial Anda</p>
+
+            <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Login Sebagai</label>
+                    <select id="roleSelect" onchange="toggleRoleFields()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm bg-white">
+                        <option value="guru">Guru Mata Pelajaran / Kelas</option>
+                        <option value="admin">Administrator / Operator</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Nama Lengkap / ID</label>
+                    <input type="text" id="loginName" placeholder="Contoh: Ahmad S.Pd" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
+                </div>
+
+                <!-- Field khusus Guru (Pilih Rombel Default) -->
+                <div id="guruRombelGroup">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Pegang Rombel Utama</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="loginTingkat" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white">
+                            <option value="Kelas 7">Kelas 7</option>
+                            <option value="Kelas 8">Kelas 8</option>
+                            <option value="Kelas 9">Kelas 9</option>
+                        </select>
+                        <select id="loginRombel" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white">
+                            <script>
+                                // Loop otomatis pilihan rombel A sampai H
+                                for(let i=0; i<8; i++) {
+                                    let char = String.fromCharCode(65 + i);
+                                    document.write(`<option value="Rombel ${char}">Rombel ${char}</option>`);
+                                }
+                            </script>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Field khusus Admin (Password) -->
+                <div id="adminPasswordGroup" class="hidden">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Password Admin</label>
+                    <input type="password" id="adminPassword" placeholder="Masukkan password admin" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
+                </div>
+
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium py-2.5 rounded-lg transition duration-200 text-sm shadow-sm">
+                    Masuk ke Sistem
+                </button>
+            </form>
+            <div id="loginAlert" class="mt-4 hidden p-2.5 rounded-lg text-xs font-medium text-center bg-rose-50 text-rose-700 border border-rose-200"></div>
+        </section>
+
+
+        <!-- SECTION: DASHBOARD GURU (INPUT JURNAL) -->
+        <section id="guruDashboard" class="hidden bg-white rounded-xl shadow-sm p-6 sm:p-8 border border-slate-100">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                <h2 class="text-lg font-semibold text-slate-700">Formulir Entri Jurnal Mengajar</h2>
+                <span class="text-xs bg-sky-50 text-sky-700 px-2.5 py-1 rounded-md border border-sky-100 font-medium" id="assignedClassLabel"></span>
+            </div>
             
-            <form id="jurnalForm" class="space-y-4">
+            <form id="jurnalForm" class="space-y-4" onsubmit="submitJurnal(event)">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Tanggal Mengajar</label>
                         <input type="date" id="tanggal" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Nama Guru / Pengajar</label>
-                        <input type="text" id="namaGuru" placeholder="Contoh: Budi Santoso, S.Pd" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Kelas / Rombel</label>
-                        <select id="kelas" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm bg-white">
-                            <option value="Kelas 7A">Kelas 7A</option>
-                            <option value="Kelas 7B">Kelas 7B</option>
-                            <option value="Kelas 8A">Kelas 8A</option>
-                            <option value="Kelas 8B">Kelas 8B</option>
-                            <option value="Kelas 9A">Kelas 9A</option>
-                            <option value="Kelas 9B">Kelas 9B</option>
-                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Mata Pelajaran</label>
@@ -52,52 +99,205 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Target Tingkat</label>
+                        <select id="tingkat" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white">
+                            <option value="Kelas 7">Kelas 7</option>
+                            <option value="Kelas 8">Kelas 8</option>
+                            <option value="Kelas 9">Kelas 9</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Pilih Rombel (A - H)</label>
+                        <select id="rombel" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white">
+                            <script>
+                                for(let i=0; i<8; i++) {
+                                    let char = String.fromCharCode(65 + i);
+                                    document.write(`<option value="Rombel ${char}">Rombel ${char} (${char})</option>`);
+                                }
+                            </script>
+                        </select>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Materi / Topik Pembelajaran</label>
-                    <input type="text" id="materi" placeholder="Contoh: Persamaan Linear Satu Variabel" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
+                    <input type="text" id="materi" placeholder="Contoh: Bab 2 - Sistem Persamaan" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-1">Catatan / Kendala / Keaktifan Siswa</label>
-                    <textarea id="catatan" rows="3" placeholder="Tuliskan catatan khusus atau kendala selama KBM berlangsung..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"></textarea>
+                    <textarea id="catatan" rows="3" placeholder="Tuliskan catatan khusus KBM..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"></textarea>
                 </div>
 
                 <button type="submit" id="btnSubmit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium py-2.5 rounded-lg transition duration-200 text-sm shadow-sm">
-                    Simpan Jurnal Harian
+                    Kirim Jurnal Harian
                 </button>
             </form>
-
             <div id="statusAlert" class="mt-4 hidden p-3 rounded-lg text-xs font-medium text-center"></div>
-        </div>
+        </section>
+
+
+        <!-- SECTION: DASHBOARD ADMIN -->
+        <section id="adminDashboard" class="hidden bg-white rounded-xl shadow-sm p-6 sm:p-8 border border-slate-100">
+            <div class="flex justify-between items-center mb-6 pb-2 border-b border-slate-100">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-700">Panel Admin & Rekapitulasi Rombel (24 Rombel)</h2>
+                    <p class="text-xs text-slate-500">Monitoring data jurnal masuk dari seluruh tingkatan dan rombel A-H.</p>
+                </div>
+                <button onclick="loadAdminData()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition">
+                    Refresh Data
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+                    <span class="block text-xs font-medium text-sky-600">Total Jurnal Masuk</span>
+                    <span id="statTotalJurnal" class="text-2xl font-bold text-sky-700 mt-1 block">0</span>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                    <span class="block text-xs font-medium text-emerald-600">Total Rombel Aktif</span>
+                    <span class="text-2xl font-bold text-emerald-700 mt-1 block">24 Rombel (7-9, A-H)</span>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                    <span class="block text-xs font-medium text-indigo-600">Status Database</span>
+                    <span class="text-2xl font-bold text-indigo-700 mt-1 block">Terhubung</span>
+                </div>
+            </div>
+
+            <!-- Tabel Rekap Data -->
+            <h3 class="text-sm font-semibold text-slate-700 mb-3">Daftar Jurnal Masuk</h3>
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                            <th class="p-3">Tanggal</th>
+                            <th class="p-3">Guru</th>
+                            <th class="p-3">Kelas / Rombel</th>
+                            <th class="p-3">Mapel</th>
+                            <th class="p-3">Materi</th>
+                            <th class="p-3">Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <tr>
+                            <td colspan="6" class="p-4 text-center text-slate-400">Memuat data dari Google Sheets...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-12 py-4 text-center text-xs text-slate-500">
-        &copy; 2026 • Sistem Jurnal Harian Guru Digital
+        &copy; 2026 • Sistem Jurnal Harian Guru & Admin (24 Rombel Terintegrasi)
     </footer>
 
-    <!-- JavaScript Controller -->
+    <!-- JavaScript Aplikasi -->
     <script>
-        // Set default tanggal hari ini
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxi8J2_vwR1DVZOrDSemN9LewUlqcvUXmFpYoH0DKjj1vxLmx6LVlY5SHeGaDor3WqcEw/exec';
+
         document.getElementById('tanggal').valueAsDate = new Date();
 
-        // Ganti dengan URL Deployment Web App Google Apps Script Anda
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygFTG1SZkvICKtB6ysM7McVCaqni29hb91sAOdP-ALlr4TQ6BfpbGL1I5KVrdHDpiGJg/exec';
+        function toggleRoleFields() {
+            const role = document.getElementById('roleSelect').value;
+            const guruGroup = document.getElementById('guruRombelGroup');
+            const adminGroup = document.getElementById('adminPasswordGroup');
 
-        document.getElementById('jurnalForm').addEventListener('submit', function(e) {
+            if (role === 'admin') {
+                guruGroup.classList.add('hidden');
+                adminGroup.classList.remove('hidden');
+            } else {
+                guruGroup.classList.remove('hidden');
+                adminGroup.classList.add('hidden');
+            }
+        }
+
+        function handleLogin(e) {
             e.preventDefault();
-            
+            const role = document.getElementById('roleSelect').value;
+            const name = document.getElementById('loginName').value.trim();
+            const alertBox = document.getElementById('loginAlert');
+            alertBox.classList.add('hidden');
+
+            if (role === 'admin') {
+                const password = document.getElementById('adminPassword').value;
+                // Password default admin sederhana (bisa diubah sesuai kebutuhan)
+                if (password !== 'admin123') {
+                    alertBox.innerText = 'Password admin salah! Gunakan: admin123';
+                    alertBox.classList.remove('hidden');
+                    return;
+                }
+                sessionStorage.setItem('userRole', 'admin');
+                sessionStorage.setItem('userName', name || 'Administrator');
+            } else {
+                const tingkat = document.getElementById('loginTingkat').value;
+                const rombel = document.getElementById('loginRombel').value;
+                sessionStorage.setItem('userRole', 'guru');
+                sessionStorage.setItem('userName', name);
+                sessionStorage.setItem('userClass', `${tingkat} - ${rombel}`);
+                
+                // Set otomatis form input guru sesuai login
+                document.getElementById('tingkat').value = tingkat;
+                document.getElementById('rombel').value = rombel;
+            }
+
+            checkSession();
+        }
+
+        function checkSession() {
+            const role = sessionStorage.getItem('userRole');
+            const name = sessionStorage.getItem('userName');
+
+            if (!role) {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('guruDashboard').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.add('hidden');
+                document.getElementById('userInfo').classList.add('hidden');
+                document.getElementById('headerSubtitle').innerText = 'Silakan login terlebih dahulu';
+                return;
+            }
+
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('userNameDisplay').innerText = name;
+
+            if (role === 'admin') {
+                document.getElementById('userRoleBadge').innerText = 'ADMINISTRATOR';
+                document.getElementById('headerSubtitle').innerText = 'Panel Kontrol & Rekap Data 24 Rombel';
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadAdminData();
+            } else {
+                const assignedClass = sessionStorage.getItem('userClass');
+                document.getElementById('userRoleBadge').innerText = 'GURU PENGAJAR';
+                document.getElementById('headerSubtitle').innerText = `Bertugas di ${assignedClass}`;
+                document.getElementById('assignedClassLabel').innerText = `Rombel Utama: ${assignedClass}`;
+                document.getElementById('guruDashboard').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            checkSession();
+        }
+
+        function submitJurnal(e) {
+            e.preventDefault();
             const btn = document.getElementById('btnSubmit');
             const alertBox = document.getElementById('statusAlert');
             
             btn.disabled = true;
-            btn.innerText = 'Menyimpan...';
+            btn.innerText = 'Mengirim...';
             alertBox.classList.add('hidden');
 
             const payload = {
                 tanggal: document.getElementById('tanggal').value,
-                namaGuru: document.getElementById('namaGuru').value,
-                kelas: document.getElementById('kelas').value,
+                namaGuru: sessionStorage.getItem('userName'),
+                tingkat: document.getElementById('tingkat').value,
+                rombel: document.getElementById('rombel').value,
                 mapel: document.getElementById('mapel').value,
                 materi: document.getElementById('materi').value,
                 catatan: document.getElementById('catatan').value
@@ -106,30 +306,69 @@
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(() => {
                 alertBox.innerText = 'Berhasil! Jurnal harian berhasil dicatat ke Google Sheets.';
                 alertBox.className = 'mt-4 p-3 rounded-lg text-xs font-medium text-center bg-emerald-50 text-emerald-700 border border-emerald-200';
                 alertBox.classList.remove('hidden');
-                
-                // Reset form kecuali tanggal dan nama guru agar lebih cepat jika mengentri banyak kelas
                 document.getElementById('materi').value = '';
                 document.getElementById('catatan').value = '';
             })
             .catch(error => {
-                alertBox.innerText = 'Gagal menyimpan jurnal: ' + error;
+                alertBox.innerText = 'Gagal menyimpan: ' + error;
                 alertBox.className = 'mt-4 p-3 rounded-lg text-xs font-medium text-center bg-rose-50 text-rose-700 border border-rose-200';
                 alertBox.classList.remove('hidden');
             })
             .finally(() => {
                 btn.disabled = false;
-                btn.innerText = 'Simpan Jurnal Harian';
+                btn.innerText = 'Kirim Jurnal Harian';
             });
-        });
+        }
+
+        function loadAdminData() {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Memuat data terbaru...</td></tr>`;
+
+            fetch(SCRIPT_URL)
+            .then(res => res.json())
+            .then(response => {
+                if (response.status === 'success' && response.data) {
+                    const data = response.data;
+                    document.getElementById('statTotalJurnal').innerText = data.length;
+                    
+                    if (data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada jurnal yang masuk.</td></tr>`;
+                        return;
+                    }
+
+                    let html = '';
+                    // Tampilkan data dari urutan terbaru (bawah ke atas)
+                    for (let i = data.length - 1; i >= 0; i--) {
+                        let row = data[i];
+                        let tgl = row['Tanggal'] ? new Date(row['Tanggal']).toLocaleDateString('id-ID') : '-';
+                        html += `<tr class="border-b border-slate-100 hover:bg-slate-50">
+                            <td class="p-3 text-slate-600">${tgl}</td>
+                            <td class="p-3 font-medium text-slate-800">${row['Nama Guru'] || '-'}</td>
+                            <td class="p-3 text-sky-700 font-semibold">${row['Tingkat'] || ''} ${row['Rombel'] || ''}</td>
+                            <td class="p-3 text-slate-600">${row['Mata Pelajaran'] || '-'}</td>
+                            <td class="p-3 text-slate-600">${row['Materi / Kegiatan'] || '-'}</td>
+                            <td class="p-3 text-slate-500 italic">${row['Catatan / Kendala'] || '-'}</td>
+                        </tr>`;
+                    }
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500">Gagal memuat data dari spreadsheet.</td></tr>`;
+                }
+            })
+            .catch(err => {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500">Terjadi kesalahan koneksi: ${err}</td></tr>`;
+            });
+        }
+
+        // Cek sesi saat halaman dimuat
+        checkSession();
     </script>
 </body>
 </html>
